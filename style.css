@@ -1,16 +1,14 @@
 /* ═══════════════════════════════════════════════
    HogAI — style.css
-   Design: Dark blue glassmorphism + neon accents
 ════════════════════════════════════════════════ */
 
-/* ── CSS Variables ── */
+/* ── Variables ── */
 :root {
   --bg:        #050c1a;
   --bg2:       #071325;
   --bg3:       #0a1a34;
   --bg4:       #0d2040;
   --glass:     rgba(10, 26, 60, 0.6);
-  --glassl:    rgba(255, 255, 255, 0.04);
   --border:    rgba(0, 140, 255, 0.12);
   --border2:   rgba(0, 180, 255, 0.22);
   --border3:   rgba(0, 200, 255, 0.38);
@@ -27,16 +25,13 @@
 }
 
 /* ── Reset ── */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   font-family: var(--font-main);
   background: var(--bg);
@@ -44,7 +39,7 @@ body {
   overflow: hidden;
 }
 
-/* ── Animated background glow ── */
+/* ── Background glow ── */
 body::before {
   content: '';
   position: fixed;
@@ -58,7 +53,7 @@ body::before {
   animation: bgShift 12s ease-in-out infinite alternate;
 }
 
-/* ── Grid lines overlay ── */
+/* ── Grid overlay ── */
 body::after {
   content: '';
   position: fixed;
@@ -96,7 +91,6 @@ body::after {
   position: relative;
 }
 
-/* top glow line */
 .sidebar::before {
   content: '';
   position: absolute;
@@ -122,19 +116,12 @@ body::after {
 .logo-pig {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, #0066ff 0%, #00b4ff 50%, #00e5ff 100%);
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 20px rgba(0, 140, 255, 0.5), 0 0 40px rgba(0, 140, 255, 0.2);
+  filter: drop-shadow(0 0 8px rgba(0, 140, 255, 0.5));
   flex-shrink: 0;
-  animation: pigGlow 3s ease-in-out infinite;
-}
-
-.logo-pig svg {
-  width: 26px;
-  height: 26px;
+  animation: logoGlow 3s ease-in-out infinite;
 }
 
 .logo-text {
@@ -239,17 +226,8 @@ body::after {
   border: 1px solid transparent;
 }
 
-.sb-item:hover {
-  background: var(--accentg);
-  color: var(--text);
-  border-color: var(--border);
-}
-
-.sb-item.active {
-  background: var(--accentg);
-  color: var(--accent);
-  border-color: var(--border2);
-}
+.sb-item:hover { background: var(--accentg); color: var(--text); border-color: var(--border); }
+.sb-item.active { background: var(--accentg); color: var(--accent); border-color: var(--border2); }
 
 /* ── Sidebar footer ── */
 .sb-foot {
@@ -294,7 +272,6 @@ body::after {
   border-radius: 10px;
   font-size: 10.5px;
   color: var(--text3);
-  cursor: pointer;
   transition: all 0.2s;
 }
 
@@ -302,7 +279,7 @@ body::after {
 .api-tag.err { border-color: rgba(255, 70, 70, 0.22);  color: #ff5555; }
 
 /* ═══════════════════════════════════════════════
-   MAIN PANEL
+   MAIN
 ════════════════════════════════════════════════ */
 .main {
   flex: 1;
@@ -313,7 +290,6 @@ body::after {
   backdrop-filter: blur(4px);
 }
 
-/* ── Top bar ── */
 .topbar {
   padding: 14px 24px;
   background: rgba(7, 19, 37, 0.85);
@@ -388,7 +364,7 @@ body::after {
 .messages::-webkit-scrollbar { width: 5px; }
 .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
 
-/* ── Welcome screen ── */
+/* ── Welcome ── */
 .welcome {
   display: flex;
   flex-direction: column;
@@ -402,31 +378,12 @@ body::after {
 }
 
 .hog-mascot {
-  width: 96px;
-  height: 96px;
-  background: linear-gradient(135deg, #0044cc 0%, #0099ff 50%, #00d4ff 100%);
-  border-radius: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 0 40px rgba(0, 140, 255, 0.45),
-    0 0 80px rgba(0, 140, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 0 24px rgba(0, 140, 255, 0.5));
   animation: mascotFloat 5s ease-in-out infinite;
-  position: relative;
 }
-
-.hog-mascot::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 36px;
-  border: 1px solid rgba(0, 180, 255, 0.2);
-  animation: mascotRing 5s ease-in-out infinite;
-}
-
-.hog-mascot svg { width: 56px; height: 56px; }
 
 .welcome h1 {
   font-size: 30px;
@@ -449,7 +406,7 @@ body::after {
   letter-spacing: 0;
 }
 
-/* ── Suggestion chips ── */
+/* ── Chips ── */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -499,14 +456,13 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   flex-shrink: 0;
   margin-top: 3px;
 }
 
 .msg-avatar.ai-av {
-  background: linear-gradient(135deg, #0055cc, #00a0ff);
-  box-shadow: 0 0 12px rgba(0, 140, 255, 0.4);
+  background: transparent;
+  filter: drop-shadow(0 0 6px rgba(0, 140, 255, 0.4));
   margin-right: 10px;
 }
 
@@ -514,6 +470,7 @@ body::after {
   background: var(--glass);
   border: 1px solid var(--border2);
   backdrop-filter: blur(10px);
+  font-size: 14px;
   margin-left: 10px;
   order: 2;
 }
@@ -557,7 +514,7 @@ body::after {
 
 .user .msg-meta { text-align: right; }
 
-/* ── Code formatting ── */
+/* ── Code ── */
 .msg-bubble pre {
   background: rgba(0, 5, 15, 0.85);
   border: 1px solid var(--border2);
@@ -587,7 +544,7 @@ body::after {
   color: #7dd3fc;
 }
 
-/* ── Typing indicator ── */
+/* ── Typing dots ── */
 .typing-dots {
   display: flex;
   gap: 5px;
@@ -609,7 +566,7 @@ body::after {
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
 /* ═══════════════════════════════════════════════
-   INPUT AREA
+   INPUT
 ════════════════════════════════════════════════ */
 .input-area {
   padding: 16px 24px 20px;
@@ -619,7 +576,6 @@ body::after {
   position: relative;
 }
 
-/* top glow line */
 .input-area::before {
   content: '';
   position: absolute;
@@ -683,12 +639,8 @@ body::after {
   box-shadow: 0 2px 16px rgba(0, 140, 255, 0.4);
 }
 
-.send-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 24px rgba(0, 140, 255, 0.6);
-}
-
-.send-btn:active  { transform: scale(0.95); }
+.send-btn:hover { transform: scale(1.08); box-shadow: 0 4px 24px rgba(0, 140, 255, 0.6); }
+.send-btn:active { transform: scale(0.95); }
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 .send-btn svg { color: #fff; }
 
@@ -728,7 +680,7 @@ body::after {
 
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.ok   { border-color: rgba(0, 255, 157, 0.35); color: var(--green); }
-.toast.err  { border-color: rgba(255, 70,  70,  0.35); color: #ff6060; }
+.toast.err  { border-color: rgba(255, 70, 70, 0.35);  color: #ff6060; }
 
 /* ═══════════════════════════════════════════════
    ANIMATIONS
@@ -738,9 +690,9 @@ body::after {
   to   { opacity: 1; }
 }
 
-@keyframes pigGlow {
-  0%,100% { box-shadow: 0 0 20px rgba(0,140,255,0.5), 0 0 40px rgba(0,140,255,0.2); }
-  50%     { box-shadow: 0 0 32px rgba(0,200,255,0.7), 0 0 64px rgba(0,140,255,0.35); }
+@keyframes logoGlow {
+  0%,100% { filter: drop-shadow(0 0 8px rgba(0,140,255,0.5)); }
+  50%     { filter: drop-shadow(0 0 16px rgba(0,200,255,0.8)); }
 }
 
 @keyframes blink {
@@ -754,14 +706,8 @@ body::after {
 }
 
 @keyframes mascotFloat {
-  0%,100% { transform: translateY(0)   rotate(0deg); }
-  33%     { transform: translateY(-12px) rotate(1.5deg); }
-  66%     { transform: translateY(-6px)  rotate(-1deg); }
-}
-
-@keyframes mascotRing {
-  0%,100% { transform: scale(1);    opacity: 0.5; }
-  50%     { transform: scale(1.08); opacity: 1; }
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-10px); }
 }
 
 @keyframes typeDot {
