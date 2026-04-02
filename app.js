@@ -448,3 +448,4 @@ function showToast(msg, type = '') {
   toastEl.className   = `toast ${type} show`;
   setTimeout(() => toastEl.classList.remove('show'), 2800);
 }
+
