@@ -3,112 +3,120 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional
-import anthropic
+from groq import Groq
 import os
 import json
 
-app = FastAPI(title="DeepChat API", version="1.0.0")
+# ── App ───────────────────────────────────────
+app = FastAPI(title="HogAI API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Hier kann man spezifische Domains angeben, z.B. ["https://myfrontend.com"]
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+# ── Groq client ───────────────────────────────
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
 
 
+# ── Schemas ───────────────────────────────────
 class Message(BaseModel):
-    role: str  # "user" | "assistant"
+    role: str
     content: str
 
 
 class ChatRequest(BaseModel):
     messages: List[Message]
-    model: Optional[str] = "claude-sonnet-4-20250514"
+    model: Optional[str] = DEFAULT_MODEL
     max_tokens: Optional[int] = 2048
-    system: Optional[str] = "You are a helpful AI assistant. Be concise, clear, and friendly."
+    system: Optional[str] = (
+        "You are HogAI, a helpful and smart AI assistant. "
+        "Format code with triple backtick markdown. "
+        "Be concise, clear, and friendly."
+    )
 
 
+# ── Routes ────────────────────────────────────
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "DeepChat API is running 🚀"}
+    return {"status": "ok", "message": "HogAI API is running 🐷"}
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "model": DEFAULT_MODEL}
 
 
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
-    """Non-streaming chat endpoint"""
+    """Non-streaming — returns full response at once"""
     try:
         messages = [{"role": m.role, "content": m.content} for m in req.messages]
+        full_messages = [{"role": "system", "content": req.system}] + messages
 
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=req.model,
             max_tokens=req.max_tokens,
-            system=req.system,
-            messages=messages,
+            messages=full_messages,
         )
 
         return {
-            "content": response.content[0].text,
-            "model": response.model,
+            "content": response.choices[0].message.content,
+            "model":   response.model,
             "usage": {
-                "input_tokens": response.usage.input_tokens,
-                "output_tokens": response.usage.output_tokens,
+                "input_tokens":  response.usage.prompt_tokens,
+                "output_tokens": response.usage.completion_tokens,
             },
         }
-    except anthropic.AuthenticationError:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    except anthropic.RateLimitError:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        err = str(e)
+        if "invalid_api_key" in err or "401" in err:
+            raise HTTPException(status_code=401, detail="Invalid GROQ_API_KEY")
+        if "rate_limit" in err or "429" in err:
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+        raise HTTPException(status_code=500, detail=err)
 
 
 @app.post("/api/chat/stream")
 async def chat_stream(req: ChatRequest):
-    """Streaming chat endpoint — returns Server-Sent Events"""
+    """Streaming — returns Server-Sent Events (SSE)"""
     messages = [{"role": m.role, "content": m.content} for m in req.messages]
+    full_messages = [{"role": "system", "content": req.system}] + messages
 
     def generate():
         try:
-            with client.messages.stream(
+            stream = client.chat.completions.create(
                 model=req.model,
                 max_tokens=req.max_tokens,
-                system=req.system,
-                messages=messages,
-            ) as stream:
-                for text in stream.text_stream:
-                    data = json.dumps({"delta": text})
-                    yield f"data: {data}\n\n"
+                messages=full_messages,
+                stream=True,
+            )
 
-                # Send Schlussmeldung mit Token-Usage
-                final = stream.get_final_message()
-                done_data = json.dumps({
-                    "done": True,
-                    "usage": {
-                        "input_tokens": final.usage.input_tokens,
-                        "output_tokens": final.usage.output_tokens,
-                    }
-                })
-                yield f"data: {done_data}\n\n"
+            input_tokens  = 0
+            output_tokens = 0
 
-        except anthropic.AuthenticationError:
-            yield f"data: {json.dumps({'error': 'Invalid API key'})}\n\n"
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    yield f"data: {json.dumps({'delta': delta})}\n\n"
+
+                if chunk.usage:
+                    input_tokens  = chunk.usage.prompt_tokens
+                    output_tokens = chunk.usage.completion_tokens
+
+            yield f"data: {json.dumps({'done': True, 'usage': {'input_tokens': input_tokens, 'output_tokens': output_tokens}})}\n\n"
+
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(
         generate(),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
