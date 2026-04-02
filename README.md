@@ -35,7 +35,7 @@ HogAI ist mein erstes Full-Stack-Projekt: ein komplett funktionierender AI-Chatb
 |-----------------|-------------------------------------|
 | Frontend        | HTML5, CSS3 (Glassmorphism), JS ES6 |
 | Backend         | Python 3.11, FastAPI, Uvicorn       |
-| AI API          | Anthropic Claude (claude-sonnet-4)  |
+| AI API          | Groq (llama-3.3-70b-versatile)  |
 | Streaming       | Server-Sent Events (SSE)            |
 | Deployment      | GitHub Pages + Render.com (free)    |
 | Version Control | Git + GitHub                        |
